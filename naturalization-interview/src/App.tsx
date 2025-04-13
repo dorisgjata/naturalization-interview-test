@@ -1,22 +1,23 @@
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import {
   Box,
   Button,
   Card,
   CardContent,
-  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
 import "./App.css";
 import QnA from "./QnA.tsx";
+import TopNav from "./components/TopNav";
+
 type CardType = {
   title: string;
   subtitle: string;
   detail: string;
   content: JSX.Element;
 };
+
 function App() {
   const [showContent, setShowContent] = useState<JSX.Element | null>(null);
   const data: CardType[] = [
@@ -24,25 +25,27 @@ function App() {
       title: "100 Questions Civics Test",
       subtitle: "History and Government Test for the Naturalization Test",
       detail: "Practice the test with of 10 questions per round.",
-      content: <QnA />,
+      content: <QnA onBack={() => setShowContent(null)} />,
     },
     {
       title: "Flash Cards",
       subtitle: "History and Government Test for the Naturalization Test",
       detail: "Practice each question using flashcards.",
-      content: <QnA />,
+      content: <QnA onBack={() => setShowContent(null)} />,
     },
   ];
+
   const cards = () => {
     return data.map((card, index) => (
       <Card
         key={`card_${index}`}
         sx={{
+          borderRadius: 2,
           maxWidth: 400,
           maxHeight: 400,
           minWidth: 275,
           minHeight: 275,
-          background: "#888",
+          background: "#303030",
         }}
       >
         <CardContent
@@ -54,10 +57,17 @@ function App() {
             height: "90%",
           }}
         >
-          <Typography sx={{ fontSize: 24, fontWeight: 500, lineHeight: 1.3 }}>
+          <Typography
+            sx={{
+              color: "#E0E0E0",
+              fontSize: 24,
+              fontWeight: 500,
+              lineHeight: 1.3,
+            }}
+          >
             {card.title}
           </Typography>
-          <Typography sx={{ fontSize: 18, color: "#353839" }}>
+          <Typography sx={{ fontSize: 18, color: "#f3f3f3" }}>
             {card.subtitle}
           </Typography>
           <Button
@@ -66,9 +76,9 @@ function App() {
             size="large"
             sx={{
               borderRadius: 5,
-              borderColor: "#41362D", //taupe
+              borderColor: "#bf8a49",
               borderWidth: "2px",
-              color: "#41362D",
+              color: "#f2f2f2",
               fontWeight: 500,
               textTransform: "none",
             }}
@@ -79,7 +89,7 @@ function App() {
           <Typography
             sx={{
               fontSize: 16,
-              color: "#353839", //Onyx
+              color: "#f3f3f3",
             }}
           >
             {card.detail}
@@ -88,36 +98,27 @@ function App() {
       </Card>
     ));
   };
+
   return (
-    <Box
-      component="div"
-      width="100%"
-      sx={{ display: "flex", alignContent: "center", flexDirection: "row" }}
-    >
-      {!showContent && (
-        <Typography variant="h1"> Naturalization Test Practice</Typography>
-      )}
+    <Box component="div" width="100%">
       {showContent ? (
-        <>
-          <IconButton
-            color="inherit"
-            sx={{
-              position: "absolute",
-              left: 0,
-              top: 5,
-              right: 5,
-              justifyContent: "flex-start",
-            }}
-            onClick={() => setShowContent(null)}
-          >
-            <ArrowBackIosNewIcon />
-          </IconButton>
-          {showContent}
-        </>
+        showContent
       ) : (
-        <Stack direction="row" gap={3}>
-          {cards()}
-        </Stack>
+        <>
+          <TopNav title="Naturalization Test Practice" />
+          <Box
+            sx={{
+              marginTop: "80px",
+              maxWidth: "1200px",
+              margin: "80px auto 0",
+              padding: "0 24px",
+            }}
+          >
+            <Stack direction="row" gap={3}>
+              {cards()}
+            </Stack>
+          </Box>
+        </>
       )}
     </Box>
   );

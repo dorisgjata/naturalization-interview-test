@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* background-color: #383838; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,6 +19,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #212121;
 }
 
 h1 {
@@ -29,7 +30,7 @@ h1 {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    color: #212121;
     background-color: #ffffff;
   }
 }
