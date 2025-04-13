@@ -1,10 +1,10 @@
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import {
   Box,
   Button,
+  CircularProgress,
   Collapse,
   Divider,
   IconButton,
@@ -15,36 +15,66 @@ import {
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { getQnA, textToSpeech } from "./api";
+import TopNav from "./components/TopNav";
+import { QnAs } from "./types";
 
-export type QnAs = {
-  question: string;
-  answers: string[];
+type QnAProps = {
+  onBack?: () => void;
 };
-function QnA() {
+
+function QnA({ onBack }: QnAProps) {
   const [questions, setQuestions] = useState<QnAs[]>([]);
-  const [, setAudioUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState("");
   const audioElement = useRef<HTMLAudioElement>(null);
 
-  const [open, setOpen] = useState<{
-    [index: string]: boolean;
-  }>({});
+  const [openQuestions, setOpenQuestions] = useState<Record<number, boolean>>(
+    {}
+  );
 
-  const getQuestions = () =>
-    getQnA().then((response) => {
-      if (response) setQuestions(response as QnAs[]);
-    });
-  const loadNextQuestions = () => {
-    getQuestions();
-    setOpen({});
+  const getQuestions = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await getQnA();
+      console.log("API Response:", response);
+      if (response && Array.isArray(response)) {
+        setQuestions(response);
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (err) {
+      console.error("Error fetching questions:", err);
+      setError("Failed to load questions. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const loadNextQuestions = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      await getQuestions();
+      setOpenQuestions({});
+    } catch (error) {
+      console.error("Error loading next questions:", error);
+      setError("Failed to load next questions. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
+    console.log("Current questions:", questions);
     getQuestions();
   }, []);
 
   const toggleCollapse = (index: number) => {
-    setOpen((prevState) => ({
-      ...prevState,
-      [`${index}`]: !prevState[index],
+    setOpenQuestions((prev) => ({
+      ...prev,
+      [index]: !prev[index],
     }));
   };
 
@@ -53,117 +83,166 @@ function QnA() {
       const url = await textToSpeech(text);
       setAudioUrl(url);
 
-      if (audioElement && audioElement.current) {
+      if (audioElement.current) {
         audioElement.current.src = url;
         audioElement.current.play();
       }
     } catch (error) {
-      console.log("Error generating speech.", error);
+      console.error("Error generating speech:", error);
     }
   };
-  const questionCards = () => {
-    return (
-      <List dense>
-        {questions.map((question, index) => {
-          return (
-            <>
-              <ListItem
-                sx={{ display: "flex", alignItems: "center" }}
-                key={`q_${index}`}
-                secondaryAction={
-                  <IconButton
-                    style={{ color: "white" }}
-                    aria-label="generate speech"
-                    onClick={() => generateSpeech(question.question)}
-                  >
-                    <PlayCircleOutlineIcon />
-                  </IconButton>
-                }
-                disablePadding
-              >
+
+  const QuestionItem = ({
+    question,
+    index,
+  }: {
+    question: QnAs;
+    index: number;
+  }) => (
+    <Box key={`question-${index}`}>
+      <ListItem
+        sx={{ display: "flex", alignItems: "center" }}
+        secondaryAction={
+          <IconButton
+            style={{ color: "white" }}
+            aria-label={`Play question ${index + 1}`}
+            onClick={() => generateSpeech(question.question)}
+          >
+            <PlayCircleOutlineIcon />
+          </IconButton>
+        }
+        disablePadding
+      >
+        <IconButton
+          style={{ color: "white" }}
+          aria-label={`${
+            openQuestions[index] ? "Hide" : "Show"
+          } answers for question ${index + 1}`}
+          onClick={() => toggleCollapse(index)}
+        >
+          {openQuestions[index] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </IconButton>
+
+        <ListItemText
+          primary={question.question}
+          primaryTypographyProps={{
+            fontSize: 18,
+            width: "85%",
+          }}
+        />
+      </ListItem>
+      <Collapse in={openQuestions[index]} timeout="auto" unmountOnExit>
+        <List sx={{ pl: 5 }} disablePadding>
+          {question.answers.map((answer, answerIndex) => (
+            <ListItem
+              sx={{ pb: 0.5, pl: 2 }}
+              disablePadding
+              key={`answer-${index}-${answerIndex}`}
+              secondaryAction={
                 <IconButton
                   style={{ color: "white" }}
-                  aria-label="delete"
-                  onClick={() => toggleCollapse(index)}
+                  aria-label={`Play answer ${answerIndex + 1}`}
+                  onClick={() => generateSpeech(answer)}
                 >
-                  {open[index] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  <PlayCircleOutlineIcon />
                 </IconButton>
+              }
+            >
+              <ListItemText
+                primary={answer}
+                primaryTypographyProps={{
+                  fontSize: 16,
+                  width: "60%",
+                  color: "rgba(220,220,220,0.8)",
+                }}
+              />
+            </ListItem>
+          ))}
+        </List>
+      </Collapse>
+      {index !== questions.length - 1 && (
+        <Divider variant="middle" component="li" sx={{ borderColor: "#888" }} />
+      )}
+    </Box>
+  );
 
-                <ListItemText
-                  primary={question.question}
-                  primaryTypographyProps={{
-                    fontSize: 18,
-                    width: "85%",
-                  }}
-                />
-              </ListItem>
-              <Collapse in={open[`${index}`]} timeout="auto" unmountOnExit>
-                <List sx={{ pl: 5 }} disablePadding>
-                  {question.answers.map((answer, index) => (
-                    <ListItem
-                      sx={{ pb: 0.5, pl: 2 }}
-                      disablePadding
-                      key={`a_${index}`}
-                      secondaryAction={
-                        <IconButton
-                          style={{ color: "white" }}
-                          aria-label="delete"
-                          onClick={() => generateSpeech(answer)}
-                        >
-                          <PlayCircleOutlineIcon />
-                        </IconButton>
-                      }
-                    >
-                      <ListItemText
-                        primary={answer}
-                        primaryTypographyProps={{
-                          fontSize: 16,
-                          width: "60%",
-                          color: "rgba(220,220,220,0.8)",
-                        }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-              {index !== questions.length - 1 && (
-                <Divider
-                  variant="middle"
-                  component="li"
-                  sx={{ borderColor: "#888" }}
-                />
-              )}
-            </>
-          );
-        })}
-      </List>
+  if (isLoading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <CircularProgress />
+      </Box>
     );
-  };
+  }
+
+  if (error) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box component="div">
-      <Typography variant="h1" sx={{ fontSize: 32 }}>
-        Civics Questions for the Naturalization Test
-      </Typography>
-      {questionCards()}
-      <audio ref={audioElement} controls style={{ display: "none" }} />
-      <Button
-        color="inherit"
-        variant="outlined"
-        size="large"
+      <TopNav
+        title="Civics Questions for the Naturalization Test"
+        onHomeClick={onBack}
+      />
+
+      <Box
         sx={{
-          mt: 2,
-          borderRadius: 5,
-          borderColor: "#F2F2F2", //taupe
-          borderWidth: "2px",
-          color: "#F2F2F2",
-          fontWeight: 500,
-          textTransform: "none",
+          margin: "80px auto 0",
+          padding: 2,
+          backgroundColor: "#181818",
+          minWidth: "70vw",
+          borderRadius: 2,
         }}
-        onClick={() => loadNextQuestions()}
       >
-        Next Questions
-      </Button>
+        {questions.length === 0 && !isLoading && !error ? (
+          <Typography>No questions available</Typography>
+        ) : (
+          <List dense>
+            {questions.map((question, index) => (
+              <QuestionItem
+                key={`question-${index}`}
+                question={question}
+                index={index}
+              />
+            ))}
+          </List>
+        )}
+        <audio ref={audioElement} controls style={{ display: "none" }} />
+        <Button
+          color="inherit"
+          variant="outlined"
+          size="large"
+          sx={{
+            mt: 2,
+            borderRadius: 5,
+            borderColor: "#bf8a49",
+            borderWidth: "2px",
+            color: "#F2F2F2",
+            fontWeight: 500,
+            textTransform: "none",
+          }}
+          onClick={loadNextQuestions}
+          disabled={isLoading}
+        >
+          {isLoading ? "Loading..." : "Next Questions"}
+        </Button>
+      </Box>
     </Box>
   );
 }
+
 export default QnA;
