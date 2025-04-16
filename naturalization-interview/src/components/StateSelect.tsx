@@ -2,7 +2,7 @@ import { Autocomplete, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 
-import { getStateByZip, US_STATES } from "../api";
+import { getStateByZip, US_STATES } from "../app/utils/api";
 
 const DarkAutocomplete = styled(Autocomplete)(() => ({
   "& .MuiInputBase-root": {
@@ -20,9 +20,6 @@ const DarkAutocomplete = styled(Autocomplete)(() => ({
   "& .MuiOutlinedInput-notchedOutline": {
     borderColor: "#333",
   },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#555",
-  },
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
     borderColor: "#888",
   },
@@ -38,9 +35,6 @@ const DarkAutocomplete = styled(Autocomplete)(() => ({
   },
   "& .MuiAutocomplete-option": {
     '&[aria-selected="true"]': {
-      backgroundColor: "#bf8a49",
-    },
-    "&:hover": {
       backgroundColor: "#bf8a49",
     },
   },

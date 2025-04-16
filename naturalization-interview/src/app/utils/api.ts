@@ -1,17 +1,3 @@
-export const getQnA = async () =>
-  await fetch("http://127.0.0.1:8000/questions", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-    })
-    .catch((error) => console.error(error));
-
 export const textToSpeech = async (text: string) => {
   try {
     const response = await fetch("http://127.0.0.1:8000/tts", {
