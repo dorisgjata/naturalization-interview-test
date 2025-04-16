@@ -44,24 +44,27 @@ function FlashCard() {
           flexFlow: "column",
         }}
       >
-        {favorites.length === 0 ? (
-          <Box>
-            <Typography>
-              Start adding questions to favorites to practice with flashcards.
-            </Typography>
-            <StyledButton onClick={handleModalOpen}>Add questions</StyledButton>
-            <QuestionsModal open={open} onClose={handleModalClose} />
-          </Box>
-        ) : (
-          <Stack
-            spacing={2}
-            direction="column"
-            sx={{
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            {favorites.map(
+        <Stack
+          spacing={2}
+          direction="column"
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {" "}
+          {favorites.length === 0 ? (
+            <>
+              <Typography>
+                Start adding questions to favorites to practice with flashcards.
+              </Typography>
+              <StyledButton onClick={handleModalOpen}>
+                Add questions
+              </StyledButton>
+              <QuestionsModal open={open} onClose={handleModalClose} />
+            </>
+          ) : (
+            favorites.map(
               (question, index) =>
                 index === currentPage - 1 && (
                   <Card
@@ -128,9 +131,9 @@ function FlashCard() {
                     </CardContent>
                   </Card>
                 )
-            )}
-          </Stack>
-        )}
+            )
+          )}
+        </Stack>
         {favorites.length > 0 && (
           <Pagination
             sx={{ mt: 5 }}

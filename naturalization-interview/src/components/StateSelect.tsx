@@ -15,10 +15,10 @@ const DarkAutocomplete = styled(Autocomplete)(() => ({
     color: "#B0B0B0",
   },
   "& .MuiInputLabel-root.Mui-focused": {
-    color: "#E0E0E0",
+    color: "#bf8a49",
   },
   "& .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#333",
+    borderColor: "#bf8a49",
   },
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
     borderColor: "#888",
@@ -31,7 +31,7 @@ const DarkAutocomplete = styled(Autocomplete)(() => ({
   },
   "& .MuiAutocomplete-listbox": {
     backgroundColor: "#1E1E1E",
-    color: "#E0E0E0",
+    color: "#bf8a49",
   },
   "& .MuiAutocomplete-option": {
     '&[aria-selected="true"]': {
@@ -77,6 +77,7 @@ function StateSelect() {
       renderInput={(params) => (
         <TextField
           {...params}
+          color="default"
           label="Enter ZIP or Select State"
           variant="outlined"
         />

@@ -91,7 +91,8 @@ const QuestionModal = ({ open, onClose }: ModalProps) => {
               <Checkbox
                 checked={selectedQuestions.has(question.id)}
                 onChange={() => handleToggleQuestion(question)}
-                color="primary"
+                color="default"
+                sx={{ color: "#bf8a49" }}
               />
               <ListItemText
                 primary={question.question}
@@ -104,19 +105,12 @@ const QuestionModal = ({ open, onClose }: ModalProps) => {
         </List>
         <StyledButton
           onClick={handleAddToFavorites}
-          variant="contained"
-          color="primary"
           disabled={selectedQuestions.size === 0}
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, mr: 2 }}
         >
           Add to Favorites
         </StyledButton>
-        <StyledButton
-          onClick={onClose}
-          sx={{ mt: 2 }}
-          variant="contained"
-          color="secondary"
-        >
+        <StyledButton onClick={onClose} sx={{ mt: 2 }} variant="contained">
           Close
         </StyledButton>
       </Box>
