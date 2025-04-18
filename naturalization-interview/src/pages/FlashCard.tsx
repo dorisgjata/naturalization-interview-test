@@ -14,6 +14,7 @@ import FavoriteButton from "../components/buttons/FavoritesButton";
 import StyledButton from "../components/buttons/StyledButton";
 import AnswersList from "../components/questions/AnswersList";
 import QuestionsModal from "../components/questions/QuestionsModal";
+import TextToSpeech from "../components/speech/TextToSpeech";
 import TopNav from "../components/topnav/TopNav";
 function FlashCard() {
   const qnas = useSelector((state: RootState) => state.questions.qnas);
@@ -52,7 +53,6 @@ function FlashCard() {
             alignItems: "center",
           }}
         >
-          {" "}
           {favorites.length === 0 ? (
             <>
               <Typography>
@@ -65,7 +65,7 @@ function FlashCard() {
             </>
           ) : (
             favorites.map(
-              (question, index) =>
+              (qna, index) =>
                 index === currentPage - 1 && (
                   <Card
                     variant="elevation"
@@ -95,13 +95,18 @@ function FlashCard() {
                           variant="h6"
                           sx={{
                             alignSelf: "center",
+                            textAlign: "center",
                             pr: 2,
                           }}
                         >
-                          {question.question}
+                          {qna.question}
                         </Typography>
                         <CardActions>
-                          <FavoriteButton qna={question} />
+                          <FavoriteButton qna={qna} />
+                          <TextToSpeech
+                            text={qna.question}
+                            label={`Play question ${index + 1}`}
+                          />
                         </CardActions>
                       </Stack>
 
@@ -121,10 +126,7 @@ function FlashCard() {
                               Show Answer
                             </StyledButton>
                           ) : (
-                            <AnswersList
-                              answers={question.answers}
-                              index={index}
-                            />
+                            <AnswersList answers={qna.answers} index={index} />
                           )}
                         </Box>
                       </Typography>
