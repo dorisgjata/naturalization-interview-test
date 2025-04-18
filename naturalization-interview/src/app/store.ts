@@ -2,14 +2,19 @@ import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { questionsApi } from "../components/questions/questionsApi";
 import questionsReducer from "../components/questions/questionsSlice";
+import { textToSpeechApi } from "../components/questions/textToSpeechApi";
 
 export const store = configureStore({
   reducer: {
     questions: questionsReducer,
     [questionsApi.reducerPath]: questionsApi.reducer,
+    [textToSpeechApi.reducerPath]: textToSpeechApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(questionsApi.middleware),
+    getDefaultMiddleware().concat(
+      questionsApi.middleware,
+      textToSpeechApi.middleware
+    ),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

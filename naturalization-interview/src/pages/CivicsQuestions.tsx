@@ -21,6 +21,7 @@ import StyledButton from "../components/buttons/StyledButton";
 import AnswersList from "../components/questions/AnswersList";
 import { useGetAllQuestionsQuery } from "../components/questions/questionsApi";
 import { setQuestions } from "../components/questions/questionsSlice";
+import { useTextToSpeechMutation } from "../components/questions/textToSpeechApi";
 import TopNav from "../components/topnav/TopNav";
 
 const PAGE_SIZE = 10;
@@ -49,6 +50,8 @@ function CivicsQuestions() {
       skip: !shouldFetch,
     }
   );
+  const [textToSpeech, { isLoading: speechIsLoading }] =
+    useTextToSpeechMutation();
 
   useEffect(() => {
     if (isSuccess && data) {
@@ -78,12 +81,11 @@ function CivicsQuestions() {
   };
 
   const generateSpeech = async (text: string) => {
-    console.log(text);
     try {
-      // setAudioUrl(url);
-
+      const audioUrl = await textToSpeech(text).unwrap();
+      setAudioUrl(audioUrl);
       if (audioElement.current) {
-        audioElement.current.src = "url";
+        audioElement.current.src = audioUrl;
         audioElement.current.play();
       }
     } catch (error) {
