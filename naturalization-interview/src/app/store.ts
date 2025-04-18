@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { questionsApi } from "../components/questions/questionsApi";
 import questionsReducer from "../components/questions/questionsSlice";
-import { textToSpeechApi } from "../components/questions/textToSpeechApi";
+import { textToSpeechApi } from "../components/speech/textToSpeechApi";
 
 export const store = configureStore({
   reducer: {

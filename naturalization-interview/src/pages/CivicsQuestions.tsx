@@ -1,6 +1,5 @@
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import {
   Box,
   CircularProgress,
@@ -13,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { RootState } from "@reduxjs/toolkit/query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { QnA } from "../app/types/types";
 import FavoriteButton from "../components/buttons/FavoritesButton";
@@ -21,15 +20,14 @@ import StyledButton from "../components/buttons/StyledButton";
 import AnswersList from "../components/questions/AnswersList";
 import { useGetAllQuestionsQuery } from "../components/questions/questionsApi";
 import { setQuestions } from "../components/questions/questionsSlice";
-import { useTextToSpeechMutation } from "../components/questions/textToSpeechApi";
+import TextToSpeech from "../components/speech/TextToSpeech";
 import TopNav from "../components/topnav/TopNav";
 
 const PAGE_SIZE = 10;
 
 function CivicsQuestions() {
   // const [questions, setQuestions] = useState<QnAs[]>([]);
-  const [, setAudioUrl] = useState("");
-  const audioElement = useRef<HTMLAudioElement>(null);
+
   const dispatch = useDispatch();
 
   const [openQuestions, setOpenQuestions] = useState<Record<number, boolean>>(
@@ -50,8 +48,6 @@ function CivicsQuestions() {
       skip: !shouldFetch,
     }
   );
-  const [textToSpeech, { isLoading: speechIsLoading }] =
-    useTextToSpeechMutation();
 
   useEffect(() => {
     if (isSuccess && data) {
@@ -80,19 +76,6 @@ function CivicsQuestions() {
     }));
   };
 
-  const generateSpeech = async (text: string) => {
-    try {
-      const audioUrl = await textToSpeech(text).unwrap();
-      setAudioUrl(audioUrl);
-      if (audioElement.current) {
-        audioElement.current.src = audioUrl;
-        audioElement.current.play();
-      }
-    } catch (error) {
-      console.error("Error generating speech:", error);
-    }
-  };
-
   const QuestionItem = ({ qna, index }: { qna: QnA; index: number }) => (
     <Box key={`question-${index}`}>
       <ListItem
@@ -101,13 +84,10 @@ function CivicsQuestions() {
         secondaryAction={
           <>
             <FavoriteButton qna={qna} />
-            <IconButton
-              style={{ color: "white" }}
-              aria-label={`Play question ${index + 1}`}
-              onClick={() => generateSpeech(qna.question)}
-            >
-              <PlayCircleOutlineIcon />
-            </IconButton>
+            <TextToSpeech
+              text={qna.question}
+              label={`Play question ${index + 1}`}
+            />
           </>
         }
       >
@@ -207,7 +187,6 @@ function CivicsQuestions() {
             ))}
           </List>
 
-          <audio ref={audioElement} controls style={{ display: "none" }} />
           <StyledButton
             onClick={goToNextSet}
             disabled={isLoading}
